@@ -2,9 +2,12 @@
 
 > **API RESTful para gerenciamento de investimentos com ASP.NET Core 9.0 e PostgreSQL**
 
+🌐 **API em Produção:** https://sua-api-investimentos-production.up.railway.app/swagger
+
 [![.NET](https://img.shields.io/badge/.NET-9.0-purple.svg)](https://dotnet.microsoft.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)](https://www.postgresql.org/)
 [![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-85EA2D.svg)](https://swagger.io/)
+[![Railway](https://img.shields.io/badge/Deploy-Railway-success.svg)](https://sua-api-investimentos-production.up.railway.app)
 
 ## 👥 **EQUIPE**
 - **André Lambert** - RM: 99148 | **Felipe Cortez** - RM: 99750 | **Julia Lins** - RM: 98690 | **Luis Barreto** - RM: 99210 | **Victor Aranda** - RM: 99667
@@ -91,7 +94,7 @@ GET    /api/apisexternas/codigos-b3              # Códigos B3 válidos
 |----------|------|--------|-------------|
 | **ASP.NET Core + EF + CRUD** | 35% | ✅ | `Controllers/` + `Repositories/` |
 | **Consultas LINQ** | 10% | ✅ | `EfInvestimentoRepository.cs` (6 consultas) |
-| **Deploy Cloud** | 15% | ✅ | PostgreSQL Supabase + scripts deploy |
+| **Deploy Cloud** | 15% | ✅ | Railway (online) + PostgreSQL Supabase |
 | **APIs Externas** | 20% | ✅ | Brapi + HG Brasil (`ApisExternasController`) |
 | **Documentação** | 10% | ✅ | Swagger + README |
 | **Diagrama Arquitetura** | 10% | ✅ | `Diagrama.png` (acima) |
@@ -143,9 +146,18 @@ Investimentos/
 
 ---
 
-**🎯 Acesse:** `http://localhost:8080/swagger` **após executar `dotnet run`**
+**🎯 Local:** `http://localhost:8080/swagger` **após executar `dotnet run`**
+**🌐 Online:** https://sua-api-investimentos-production.up.railway.app/swagger
 
 ## 🧪 **COMO TESTAR**
+
+### **🔥 Testar Online (SEM instalar nada):**
+1. **Acesse:** https://sua-api-investimentos-production.up.railway.app/swagger
+2. **Use os exemplos abaixo** diretamente no Swagger online
+3. **Dados já carregados** - pode testar imediatamente!
+
+### **💻 Testar Local:**
+Execute `dotnet run` e acesse: `http://localhost:8080/swagger`
 
 ### **1. Criar um investimento**
 ```json
