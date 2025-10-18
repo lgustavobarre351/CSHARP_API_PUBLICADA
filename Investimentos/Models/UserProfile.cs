@@ -10,7 +10,7 @@ public class UserProfile
     /// <summary>
     /// ID único do usuário
     /// </summary>
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     /// <summary>
     /// Email do usuário

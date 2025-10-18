@@ -26,17 +26,23 @@ RUN apt-get update && apt-get install -y \
 # Copy aplicação
 COPY --from=build /app/publish .
 
-# Configurar usuário não-root para segurança
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-RUN chown -R appuser:appuser /app
-USER appuser
+# Configurar variáveis de ambiente para Railway
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080
+ENV DOTNET_RUNNING_IN_CONTAINER=true
 
-# Expor porta
+# Configurar usuário não-root para segurança (mas só em desenvolvimento)
+# Railway funciona melhor como root em alguns casos
+# RUN groupadd -r appuser && useradd -r -g appuser appuser
+# RUN chown -R appuser:appuser /app
+# USER appuser
+
+# Expor porta (Railway usa PORT dinâmico, mas padrão é 8080)
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8080/swagger || exit 1
+# Health check mais robusto
+HEALTHCHECK --interval=30s --timeout=15s --start-period=90s --retries=5 \
+    CMD curl -f http://localhost:8080/health || curl -f http://localhost:8080/swagger || exit 1
 
-# Entry point
-ENTRYPOINT ["dotnet", "Investimentos.dll"]
+# Entry point com logs mais verbosos
+ENTRYPOINT ["dotnet", "Investimentos.dll", "--environment=Production"]
