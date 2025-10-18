@@ -1,325 +1,183 @@
 # 💰 API de Investimentos - Challenge FIAP 2024
 
-> **Sistema completo de gerenciamento de investimentos com ASP.NET Core 9.0 e PostgreSQL**
+> **API RESTful para gerenciamento de investimentos com ASP.NET Core 9.0 e PostgreSQL**
 
-## 👥 **EQUIPE DESENVOLVEDORA**
-- **André Lambert** - RM: 99148
-- **Felipe Cortez** - RM: 99750  
-- **Julia Lins** - RM: 98690
-- **Luis Barreto** - RM: 99210
-- **Victor Aranda** - RM: 99667
+[![.NET](https://img.shields.io/badge/.NET-9.0-purple.svg)](https://dotnet.microsoft.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)](https://www.postgresql.org/)
+[![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-85EA2D.svg)](https://swagger.io/)
 
----
+## 👥 **EQUIPE**
+- **André Lambert** - RM: 99148 | **Felipe Cortez** - RM: 99750 | **Julia Lins** - RM: 98690 | **Luis Barreto** - RM: 99210 | **Victor Aranda** - RM: 99667
 
-## 🎯 **CRITÉRIOS DE AVALIAÇÃO ATENDIDOS**
+## 🚀 **COMO RODAR (2 MINUTOS)**
 
-### ✅ ASP.NET Core Web API e Entity Framework com CRUD completo (35%)
-- **Framework**: ASP.NET Core 9.0 com Entity Framework Core
-- **CRUD Completo**: Operações Create, Read, Update, Delete para Investimentos e Usuários
-- **Banco de Dados**: PostgreSQL com configuração para múltiplos ambientes
-- **Migrations**: Configuração automática de tabelas e relacionamentos
+**📋 Pré-requisito:** .NET 9.0 SDK ([baixar aqui](https://dotnet.microsoft.com/download/dotnet/9.0))
 
-### ✅ Pesquisas com LINQ (peso 10%)
-- **Consultas LINQ Implementadas**:
-  - Filtros por tipo de investimento (`Where` + `OrderByDescending`)
-  - Filtros por operação (compra/venda) (`Where` + `OrderByDescending`)
-  - Cálculo de saldo líquido (`Join` + `Select` + `SumAsync`)
-  - Investimentos recentes (`Where` com filtro de data)
-  - Dashboard com estatísticas (`GroupBy` + `Count` + `Sum` + `Average`)
-  - Lista de CPFs únicos (`Join` + `Distinct` + `OrderBy`)
-- **Identificação no Swagger**: Todos os endpoints LINQ estão marcados com `[LINQ]` na documentação
+### **💻 Opção 1: Terminal/CMD**
+```bash
+# 1. Clone o repositório
+git clone https://github.com/lgustavobarre351/CSHARP_API_PUBLICADA.git
 
-### ✅ Publicação em ambiente Cloud (15%)
-- **Deploy**: Configurado para Render Cloud Platform
-- **URLs de Produção**: Suporte para múltiplos ambientes (desenvolvimento/produção)
-- **Configuração Multi-Ambiente**: Detecção automática do ambiente de execução
+# 2. Entre na pasta e execute
+cd CSHARP_API_PUBLICADA/Investimentos
+dotnet run
 
-### ✅ Endpoints conectando com outras APIs (20%)
-- **API da B3**: Integração com códigos de ações da Bolsa de Valores
-- **API HG Brasil**: Consulta de cotações em tempo real
-- **Validação Externa**: Sistema de validação de códigos de ações
-- **HttpClient**: Configuração para consumo de APIs externas
+# 3. Abra no navegador
+# http://localhost:8080/swagger
+```
 
-### ✅ Documentação do projeto (10%)
-- **Swagger/OpenAPI**: Documentação interativa completa
-- **Exemplos**: Todos os endpoints com exemplos de uso
-- **Guias de Uso**: Instruções passo a passo no próprio Swagger
-- **README Detalhado**: Este documento com instruções completas
+### **🔧 Opção 2: VS Code**
+```bash
+# 1. Clone e abra no VS Code
+git clone https://github.com/lgustavobarre351/CSHARP_API_PUBLICADA.git
+code CSHARP_API_PUBLICADA
 
-### ✅ Apresentar arquitetura em diagramas (10%)
-- **Diagrama de Arquitetura**: Visualização completa do sistema
-- **Fluxo de Dados**: Representação das interações entre componentes
-- **Tecnologias**: Mapeamento das tecnologias utilizadas
+# 2. Abra terminal integrado (Ctrl + `) e execute:
+cd Investimentos
+dotnet run
+
+# OU use F5 para Debug (vai abrir automaticamente no navegador)
+```
+
+### **⚡ Opção 3: Visual Studio**
+```bash
+# 1. Clone e abra o .sln
+git clone https://github.com/lgustavobarre351/CSHARP_API_PUBLICADA.git
+# Abrir: CSharp.sln no Visual Studio
+
+# 2. Pressione F5 ou clique em "Play" ▶️
+```
+
+**✅ Zero configuração necessária! Banco já configurado na nuvem.**
+
+> **⚡ Verificar .NET:** `dotnet --version` (deve mostrar 9.x.x)
+
+## 📋 **O QUE FAZ**
+
+**Sistema de investimentos com:**
+- 💰 **CRUD completo** de investimentos e usuários
+- 🔍 **6 consultas LINQ** (filtros, agregações, joins)
+- 🌐 **APIs externas** (cotações B3, HG Brasil) 
+- ☁️ **Deploy na nuvem** (PostgreSQL Supabase)
+- 📖 **Documentação Swagger** completa
+
+## 🏗️ **ARQUITETURA DO SISTEMA**
 
 ![Diagrama de Arquitetura](Diagrama.png)
 
----
+**Fluxo:** Cliente → Controllers → Services/Repository → Entity Framework → PostgreSQL + APIs Externas
 
-## ⚡ **EXECUÇÃO RÁPIDA (2 MINUTOS)**
+## 🎯 **ENDPOINTS PRINCIPAIS**
 
-> **� PROJETO PLUG AND PLAY - ZERO CONFIGURAÇÃO NECESSÁRIA!**
-
-```bash
-# Copie e cole estes 3 comandos no terminal:
-git clone https://github.com/lgustavobarre351/SPRINT4_CSHARP_API.git
-cd SPRINT4_CSHARP_API/Investimentos  
-dotnet run
-```
-
-**🎯 Depois abra no navegador: `http://localhost:5171/swagger`**
-
-> **✅ Banco de dados já configurado na nuvem (Supabase)**  
-> **✅ Dados de exemplo já carregados**  
-> **✅ APIs externas (B3 + HG Brasil) funcionando**  
-> **✅ Todas as consultas LINQ identificadas no Swagger**
-
----
-
-## �🚀 **COMO EXECUTAR O PROJETO (DETALHADO)**
-
-### 📋 **Pré-requisitos (Mínimo)**
-```bash
-# Você só precisa ter instalado:
-✅ .NET 9.0 SDK (obrigatório)
-✅ Git (para clonar o repositório)
-
-# NÃO PRECISA:
-❌ PostgreSQL (usamos banco na nuvem)
-❌ Configurar strings de conexão
-❌ Executar migrations manualmente
-❌ Instalar outras dependências
-```
-
-> **💡 Verificar se tem .NET 9.0**: Execute `dotnet --version` no terminal
-
-### 🔧 **Configuração do Ambiente**
-
-> **🎉 PROJETO PRONTO PARA EXECUTAR!** 
-> 
-> O banco de dados já está configurado na nuvem (Supabase). Não precisa instalar PostgreSQL nem configurar nada!
-
-#### 1️⃣ **Clone o Repositório**
-```bash
-git clone https://github.com/lgustavobarre351/SPRINT4_CSHARP_API.git
-cd SPRINT4_CSHARP_API
-```
-
-#### 2️⃣ **Execute o Projeto (SEM configuração adicional!)**
-```bash
-# Navegue para a pasta do projeto
-cd Investimentos
-
-# Execute a API - PRONTO!
-dotnet run
-```
-
-> **✨ EXECUÇÃO INSTANTÂNEA:**
-> - ✅ **Banco de dados**: Já configurado na nuvem (Supabase)
-> - ✅ **Tabelas**: Criadas automaticamente na primeira execução
-> - ✅ **Dados**: Banco compartilhado com dados de exemplo
-> - ✅ **Dependências**: Restauradas automaticamente pelo .NET
-
-**🚀 A API será iniciada em: `http://localhost:5171`**
-
-### 🌐 **Acesso à Aplicação**
-
-#### **🏠 Desenvolvimento Local (PLUG AND PLAY!):**
-Após executar `dotnet run`, acesse:
-- **🚀 API Base**: `http://localhost:5171`
-- **📚 Swagger UI**: `http://localhost:5171/swagger` ← **COMECE AQUI!**
-- **💡 Documentação Interativa**: Todas as funcionalidades testáveis no navegador
-- **🗄️ Banco de Dados**: Conectado automaticamente na nuvem (Supabase)
-
-> **⚡ Execução INSTANTÂNEA (3 comandos):**
-> 1. `git clone https://github.com/lgustavobarre351/SPRINT4_CSHARP_API.git`
-> 2. `cd SPRINT4_CSHARP_API/Investimentos`
-> 3. `dotnet run`
-> 
-> **🎯 Pronto! API funcionando em 2 minutos!**
-
-#### **☁️ Produção (Cloud) - Opcional:**
-- **URL da API**: `https://sua-api.onrender.com` (após deploy)
-- **Swagger Produção**: `https://sua-api.onrender.com/swagger`
-
----
-
-## 📖 **GUIA DE USO DA API**
-
-### 🎯 **Primeiros Passos**
-
-**🚀 Execução SUPER Simples:**
-```bash
-# Apenas 3 comandos:
-git clone https://github.com/lgustavobarre351/SPRINT4_CSHARP_API.git
-cd SPRINT4_CSHARP_API/Investimentos
-dotnet run
-```
-
-**⏱️ Em menos de 2 minutos a API estará rodando!**
-
-**📱 Testando a API:**
-1. **Aguarde**: A mensagem `"Now listening on: http://localhost:5171"`
-2. **Abra o navegador**: `http://localhost:5171/swagger`
-3. **Clique em "AJUDA"**: Endpoint com instruções detalhadas  
-4. **Teste TUDO**: Todos os endpoints funcionando com dados reais!
-
-### 💡 **Endpoints Principais**
-
-#### **📊 CRUD de Investimentos**
 ```http
-GET    /api/investimentos              # Lista todos [LINQ]
-GET    /api/investimentos/{id}         # Busca por ID [LINQ]
-GET    /api/investimentos/usuario/{cpf} # Por usuário [LINQ]
+# 📊 Investimentos
+GET    /api/investimentos              # Listar todos
 POST   /api/investimentos              # Criar novo
-PUT    /api/investimentos/{id}         # Atualizar
-DELETE /api/investimentos/{id}         # Deletar
+GET    /api/investimentos/saldo/{cpf}  # Saldo por usuário [LINQ]
+GET    /api/investimentos/dashboard    # Dashboard estatístico [LINQ]
+
+# 👥 Usuários  
+GET    /api/usuarios                   # Listar usuários
+POST   /api/usuarios                   # Criar usuário
+
+# 🌐 APIs Externas
+GET    /api/apisexternas/cotacao/{codigo}        # Cotação em tempo real
+GET    /api/apisexternas/codigos-b3              # Códigos B3 válidos
 ```
 
-#### **🔍 Consultas LINQ Especiais**
-```http
-GET /api/investimentos/tipo/{tipo}           # Filtrar por tipo [LINQ]
-GET /api/investimentos/operacao/{operacao}   # Compras ou vendas [LINQ]
-GET /api/investimentos/saldo/{cpf}           # Saldo líquido [LINQ]
-GET /api/investimentos/recentes              # Últimos 30 dias [LINQ]
-GET /api/investimentos/dashboard             # Estatísticas [LINQ]
-GET /api/investimentos/usuarios              # CPFs únicos [LINQ]
+## ✅ **CRITÉRIOS ATENDIDOS (100%)**
+
+| Critério | Peso | Status | Localização |
+|----------|------|--------|-------------|
+| **ASP.NET Core + EF + CRUD** | 35% | ✅ | `Controllers/` + `Repositories/` |
+| **Consultas LINQ** | 10% | ✅ | `EfInvestimentoRepository.cs` (6 consultas) |
+| **Deploy Cloud** | 15% | ✅ | PostgreSQL Supabase + scripts deploy |
+| **APIs Externas** | 20% | ✅ | Brapi + HG Brasil (`ApisExternasController`) |
+| **Documentação** | 10% | ✅ | Swagger + README |
+| **Diagrama Arquitetura** | 10% | ✅ | `Diagrama.png` (acima) |
+
+## 🔍 **CONSULTAS LINQ IMPLEMENTADAS**
+
+```csharp
+// 1. Filtro por tipo - Where + OrderBy
+.Where(i => i.Tipo.ToLower() == tipo.ToLower())
+.OrderByDescending(i => i.CriadoEm)
+
+// 2. Saldo líquido - Join + Sum  
+from i in _context.Investimentos
+join u in _context.UserProfiles on i.UserId equals u.Id
+where u.Cpf == userCpf
+select i.Operacao.ToLower() == "compra" ? i.Valor : -i.Valor
+).SumAsync()
+
+// 3. Dashboard - GroupBy + Count + Sum + Average
+.GroupBy(i => i.Tipo)
+.Select(g => new {
+    Tipo = g.Key,
+    Quantidade = g.Count(),
+    ValorTotal = g.Sum(i => i.Valor),
+    ValorMedio = g.Average(i => i.Valor)
+})
 ```
 
-#### **👥 Gerenciamento de Usuários**
-```http
-GET    /api/usuarios           # Listar todos [LINQ]
-GET    /api/usuarios/{cpf}     # Buscar por CPF [LINQ]
-POST   /api/usuarios           # Criar usuário
-PUT    /api/usuarios/{cpf}     # Atualizar usuário
-DELETE /api/usuarios/{cpf}     # Deletar usuário [LINQ]
+## 🌐 **TECNOLOGIAS**
+
+- **Backend**: ASP.NET Core 9.0
+- **ORM**: Entity Framework Core
+- **Banco**: PostgreSQL (Supabase)
+- **APIs**: Brapi, HG Brasil  
+- **Docs**: Swagger/OpenAPI
+- **Deploy**: Railway, Render, Fly.io
+
+## 📖 **ESTRUTURA DO PROJETO**
+
+```
+Investimentos/
+├── Controllers/          # 🎮 API endpoints
+├── Models/              # 📊 Entidades (Investimento, User)  
+├── Repositories/        # 📚 Acesso a dados + LINQ
+├── Services/            # ⚙️ Lógica de negócio
+├── Data/                # 🗄️ Entity Framework context
+└── Swagger/             # 📖 Documentação
 ```
 
-#### **🌐 APIs Externas**
-```http
-GET  /api/apisexternas/codigos-b3              # Códigos B3 [LINQ]
-POST /api/apisexternas/recarregar-b3           # Recarregar B3 [LINQ]
-GET  /api/apisexternas/cotacao/{codigo}        # Cotação HG Brasil
-GET  /api/apisexternas/validar-b3/{codigo}     # Validar código
-```
+---
 
-### 📝 **Exemplo de Uso Completo**
+**🎯 Acesse:** `http://localhost:8080/swagger` **após executar `dotnet run`**
 
-#### **1. Criar um Investimento**
+## 🧪 **COMO TESTAR**
+
+### **1. Criar um investimento**
 ```json
 POST /api/investimentos
 {
   "userCpf": "12345678901",
   "tipo": "Ação",
-  "codigo": "PETR4",
+  "codigo": "PETR4", 
   "valor": 1500.50,
   "operacao": "compra"
 }
 ```
 
-#### **2. Consultar Saldo do Usuário**
-```http
+### **2. Consultar saldo**
+```
 GET /api/investimentos/saldo/12345678901
 ```
 
-#### **3. Ver Dashboard de Investimentos**
-```http
+### **3. Ver cotação em tempo real**
+```
+GET /api/apisexternas/cotacao/PETR4
+```
+
+### **4. Dashboard estatístico**
+```
 GET /api/investimentos/dashboard
 ```
 
----
+## 🆘 **PROBLEMAS COMUNS**
 
-## 🏗️ **ARQUITETURA DO SISTEMA**
-
-### **📋 Componentes Principais**
-- **Controllers**: Gerenciam requisições HTTP e respostas
-- **Repositories**: Camada de acesso a dados com Entity Framework
-- **Services**: Lógica de negócio e integração com APIs externas
-- **Models**: Entidades do domínio (Investimento, UserProfile)
-- **Data**: Contexto do Entity Framework e configurações de banco
-
-### **🔄 Fluxo de Dados**
-1. **Cliente** → Requisição HTTP → **Controller**
-2. **Controller** → Chama → **Repository/Service**
-3. **Repository** → Consulta LINQ → **Database (PostgreSQL)**
-4. **Service** → Integração → **APIs Externas**
-5. **Response** ← JSON ← **Controller** ← **Cliente**
-
-### **🌍 Tecnologias Utilizadas**
-- **Backend**: ASP.NET Core 9.0
-- **ORM**: Entity Framework Core
-- **Banco**: PostgreSQL
-- **Cloud**: Render Platform
-- **APIs**: B3, HG Brasil
-- **Documentação**: Swagger/OpenAPI
-- **Versionamento**: Git/GitHub
-
----
-
-## 🚀 **DEPLOY NA NUVEM**
-
-### **Render Platform (Recomendado)**
-```bash
-# 1. Conecte seu repositório GitHub ao Render
-# 2. Configure as variáveis de ambiente:
-DATABASE_URL=sua_connection_string_postgresql
-PORT=80
-
-# 3. O deploy é automático a cada push na branch main
-```
-
-### **Outras Opções de Cloud**
-- **Azure App Service**: Suporte nativo para .NET
-- **AWS Elastic Beanstalk**: Deploy simplificado
-- **Heroku**: Configuração com buildpack .NET
-
----
-
-## 🧪 **TESTES E VALIDAÇÃO**
-
-### **Testando Localmente (Zero Configuração!)**
-```bash
-# SUPER SIMPLES - Apenas execute:
-cd Investimentos
-dotnet run
-
-# Aguarde a mensagem: "Now listening on: http://localhost:5171"
-# Então abra: http://localhost:5171/swagger
-```
-
-**🎯 Tudo funcionando imediatamente:**
-- ✅ **Banco conectado**: Supabase na nuvem
-- ✅ **Dados disponíveis**: Investimentos e usuários de exemplo
-- ✅ **APIs externas**: B3 e HG Brasil configuradas
-- ✅ **Swagger completo**: Todos os endpoints testáveis
-
-### **Validação dos Critérios**
-- ✅ **CRUD**: Teste todos os endpoints de Investimentos e Usuários
-- ✅ **LINQ**: Observe os comentários `[LINQ]` no Swagger
-- ✅ **Cloud**: Acesse a URL de produção
-- ✅ **APIs Externas**: Teste endpoints de cotação e validação B3
-- ✅ **Documentação**: Navegue pelo Swagger completo
-- ✅ **Diagrama**: Visualize o arquivo `Diagrama.png`
-
----
-
-## 📚 **RECURSOS ADICIONAIS**
-
-### **🔗 Links Úteis**
-- **🎯 Swagger Local**: http://localhost:5171/swagger ← **ACESSE AQUI APÓS `dotnet run`**
-- **📂 Repositório GitHub**: https://github.com/lgustavobarre351/SPRINT4_CSHARP_API
-- **📈 API B3 Códigos**: Integração com dados reais da bolsa
-- **💰 HG Brasil**: API de cotações financeiras
-- **🗄️ Banco Supabase**: Conectado automaticamente (sem configuração)
-
-> **⚡ Execução Instantânea**: `git clone + cd + dotnet run` = **API funcionando!**
-
-### **📞 Suporte**
-Para dúvidas ou problemas:
-1. Consulte a documentação no Swagger
-2. Verifique os logs da aplicação
-3. Entre em contato com a equipe desenvolvedora
-
----
-
-**🎉 Projeto desenvolvido para o Challenge FIAP 2024 - Demonstração completa de ASP.NET Core com todas as funcionalidades solicitadas!**
+- **Erro de porta:** Se 8080 estiver ocupada, a API usará outra porta automática
+- **Erro .NET:** Instale .NET 9.0 SDK 
+- **Erro de conexão:** Banco já configurado na nuvem, não precisa PostgreSQL local
+- **Swagger não abre:** Aguarde mensagem "Now listening on..." no terminal
 
