@@ -45,13 +45,33 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // --- Entity Framework ---
-string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+// Railway específico - verificar DATABASE_URL primeiro
+string connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") 
+    ?? builder.Configuration.GetConnectionString("DefaultConnection") 
     ?? throw new InvalidOperationException("Connection string not found");
+
+Console.WriteLine($"🔗 Using connection: {(Environment.GetEnvironmentVariable("DATABASE_URL") != null ? "DATABASE_URL (Railway)" : "appsettings")}");
+
 // Configurar Npgsql para usar comportamento legacy de timestamp (mais tolerante)
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+{
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+    {
+        // Configurações específicas para Railway/produção
+        npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorCodesToAdd: null);
+        npgsqlOptions.CommandTimeout(30);
+    });
+    
+    // Log detalhado em produção para debug
+    if (builder.Environment.IsProduction())
+    {
+        options.LogTo(Console.WriteLine, LogLevel.Information);
+        options.EnableSensitiveDataLogging(false);
+        options.EnableDetailedErrors(true); // Habilitar para debug
+    }
+});
 
 // --- Repository ---
 builder.Services.AddScoped<IInvestimentoRepository, EfInvestimentoRepository>();
@@ -75,6 +95,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// --- Inicialização do Banco (Simplificado) ---
+Console.WriteLine("�️ Configuração de banco concluída");
+
 // --- Middleware Pipeline ---
 // Swagger habilitado também em produção para demonstração
 app.UseSwagger();
@@ -96,6 +119,18 @@ app.UseRouting();
 
 // Redirecionar raiz para Swagger
 app.MapGet("/", () => Results.Redirect("/swagger"));
+
+// Endpoint simples de debug
+app.MapGet("/debug", () => 
+{
+    return Results.Ok(new
+    {
+        Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
+        Port = Environment.GetEnvironmentVariable("PORT"),
+        HasDatabaseUrl = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DATABASE_URL")),
+        Timestamp = DateTime.UtcNow
+    });
+});
 
 app.MapControllers();
 
