@@ -6,6 +6,14 @@ using ProjetoInvestimentos.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// --- Logging Configuration para Railway ---
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
+
+Console.WriteLine("🚀 INICIANDO APLICAÇÃO...");
+Console.WriteLine($"   Args: {string.Join(", ", args)}");
+
 // --- Services Configuration ---
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -55,17 +63,37 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseNpgsql(connectionString, npgsqlOptions =>
+    try
     {
-        npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorCodesToAdd: null);
-        npgsqlOptions.CommandTimeout(30);
-    });
-    
-    // Configurações adicionais para produção
-    if (!builder.Environment.IsDevelopment())
+        Console.WriteLine("🗄️ Configurando Entity Framework...");
+        options.UseNpgsql(connectionString, npgsqlOptions =>
+        {
+            npgsqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 3, 
+                maxRetryDelay: TimeSpan.FromSeconds(10), 
+                errorCodesToAdd: null
+            );
+            npgsqlOptions.CommandTimeout(60); // Aumentar timeout
+        });
+        
+        // Configurações para Railway
+        if (builder.Environment.IsProduction())
+        {
+            options.EnableSensitiveDataLogging(false);
+            options.EnableDetailedErrors(false);
+        }
+        else
+        {
+            options.EnableSensitiveDataLogging(true);
+            options.EnableDetailedErrors(true);
+        }
+        
+        Console.WriteLine("✅ Entity Framework configurado");
+    }
+    catch (Exception ex)
     {
-        options.EnableSensitiveDataLogging(false);
-        options.EnableDetailedErrors(false);
+        Console.WriteLine($"❌ Erro ao configurar EF: {ex.Message}");
+        throw;
     }
 });
 
@@ -99,38 +127,69 @@ Console.WriteLine($"   DATABASE_URL exists: {!string.IsNullOrEmpty(Environment.G
 Console.WriteLine($"   RAILWAY_STATIC_URL: {Environment.GetEnvironmentVariable("RAILWAY_STATIC_URL")}");
 Console.WriteLine($"   Connection String Source: {(Environment.GetEnvironmentVariable("DATABASE_URL") != null ? "DATABASE_URL" : "appsettings")}");
 
-// --- Inicialização do Banco ---
-try
+// --- Inicialização do Banco (Assíncrona) ---
+_ = Task.Run(async () =>
 {
-    using (var scope = app.Services.CreateScope())
+    try
     {
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        Console.WriteLine("🔄 Testando conexão com banco de dados...");
-        
-        var canConnect = await context.Database.CanConnectAsync();
-        if (canConnect)
+        await Task.Delay(2000); // Aguardar 2s para app inicializar
+        using (var scope = app.Services.CreateScope())
         {
-            Console.WriteLine("✅ Conexão com banco de dados estabelecida com sucesso");
-            await context.Database.EnsureCreatedAsync();
-            Console.WriteLine("✅ Tabelas verificadas/criadas com sucesso");
-        }
-        else
-        {
-            Console.WriteLine("❌ Não foi possível conectar ao banco de dados");
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            Console.WriteLine("🔄 Testando conexão com banco de dados...");
+            
+            var canConnect = await context.Database.CanConnectAsync();
+            if (canConnect)
+            {
+                Console.WriteLine("✅ Conexão com banco de dados estabelecida com sucesso");
+                await context.Database.EnsureCreatedAsync();
+                Console.WriteLine("✅ Tabelas verificadas/criadas com sucesso");
+            }
+            else
+            {
+                Console.WriteLine("❌ Não foi possível conectar ao banco de dados");
+            }
         }
     }
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"❌ Erro ao conectar com banco de dados:");
-    Console.WriteLine($"   Tipo: {ex.GetType().Name}");
-    Console.WriteLine($"   Mensagem: {ex.Message}");
-    Console.WriteLine($"   Stack: {ex.StackTrace}");
-    // Continue sem falhar - para debug em produção
-}
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Erro ao conectar com banco de dados:");
+        Console.WriteLine($"   Tipo: {ex.GetType().Name}");
+        Console.WriteLine($"   Mensagem: {ex.Message}");
+    }
+});
 
 // --- Middleware Pipeline ---
-// Middleware de tratamento de exceções
+Console.WriteLine("🔧 Configurando middleware...");
+
+// Middleware de tratamento de exceções personalizado
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ EXCEÇÃO NÃO TRATADA: {ex.Message}");
+        Console.WriteLine($"   Stack: {ex.StackTrace}");
+        
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+        
+        var response = new
+        {
+            error = "Internal Server Error",
+            message = ex.Message,
+            timestamp = DateTime.UtcNow,
+            path = context.Request.Path
+        };
+        
+        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response));
+    }
+});
+
+// Middleware de tratamento de exceções padrão
 app.UseExceptionHandler("/error");
 
 // Swagger habilitado também em produção para demonstração
@@ -152,8 +211,23 @@ app.UseCors();
 app.UseRouting();
 
 // --- Endpoints de Sistema ---
+// Endpoint básico de teste
+app.MapGet("/ping", () =>
+{
+    Console.WriteLine("🏓 Ping recebido!");
+    return Results.Ok(new { 
+        message = "pong", 
+        timestamp = DateTime.UtcNow,
+        status = "API está funcionando!"
+    });
+});
+
 // Redirecionar raiz para Swagger
-app.MapGet("/", () => Results.Redirect("/swagger"));
+app.MapGet("/", () => 
+{
+    Console.WriteLine("🏠 Root endpoint chamado - redirecionando para /swagger");
+    return Results.Redirect("/swagger");
+});
 
 // Endpoint de tratamento de erros
 app.MapGet("/error", () => 
@@ -165,21 +239,39 @@ app.MapGet("/error", () =>
     );
 });
 
-// Health check
-app.MapGet("/health", async (AppDbContext context) =>
+// Health check simples
+app.MapGet("/health", () =>
+{
+    Console.WriteLine("🩺 Health check chamado");
+    return Results.Ok(new { 
+        status = "Healthy", 
+        timestamp = DateTime.UtcNow,
+        version = "1.0.0",
+        environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown"
+    });
+});
+
+// Health check do banco separado
+app.MapGet("/health/database", async (AppDbContext context) =>
 {
     try
     {
-        await context.Database.CanConnectAsync();
-        return Results.Ok(new { status = "Healthy", database = "Connected", timestamp = DateTime.UtcNow });
+        Console.WriteLine("🗄️ Database health check chamado");
+        var canConnect = await context.Database.CanConnectAsync();
+        return Results.Ok(new { 
+            status = canConnect ? "Healthy" : "Unhealthy", 
+            database = canConnect ? "Connected" : "Disconnected", 
+            timestamp = DateTime.UtcNow 
+        });
     }
     catch (Exception ex)
     {
-        return Results.Problem(
-            title: "Database connection failed",
-            detail: ex.Message,
-            statusCode: 503
-        );
+        Console.WriteLine($"❌ Database health check error: {ex.Message}");
+        return Results.Ok(new { 
+            status = "Unhealthy", 
+            error = ex.Message, 
+            timestamp = DateTime.UtcNow 
+        });
     }
 });
 
@@ -192,25 +284,40 @@ var environment = app.Environment.EnvironmentName;
 var railwayPort = Environment.GetEnvironmentVariable("PORT");
 var port = railwayPort ?? "8080";
 
+Console.WriteLine("═══════════════════════════════════════");
+Console.WriteLine("🚀 INICIANDO SERVIDOR WEB");
+Console.WriteLine("═══════════════════════════════════════");
 Console.WriteLine($"🌍 Environment: {environment}");
 Console.WriteLine($"🚀 Port: {port}");
 Console.WriteLine($"📋 Railway URL: {Environment.GetEnvironmentVariable("RAILWAY_STATIC_URL")}");
+Console.WriteLine($"🔗 Bind URL: http://0.0.0.0:{port}");
+Console.WriteLine("═══════════════════════════════════════");
 
 if (environment == "Development")
 {
-    // Desenvolvimento local
     Console.WriteLine("🚀 API rodando em ambiente de DESENVOLVIMENTO");
     Console.WriteLine($"📋 Swagger Local: http://localhost:{port}/swagger");
+    Console.WriteLine($"🩺 Health: http://localhost:{port}/health");
     
     app.Run($"http://localhost:{port}");
 }
 else
 {
-    // Produção (Railway, Render, etc.)
     Console.WriteLine("🌍 API rodando em ambiente de PRODUÇÃO (Railway)");
     Console.WriteLine($"🚀 Binding to: 0.0.0.0:{port}");
     Console.WriteLine($"📋 Swagger: /swagger");
+    Console.WriteLine($"🩺 Health: /health");
+    Console.WriteLine("🔄 Iniciando servidor...");
     
     // Railway específico - bind em todas as interfaces
-    app.Run($"http://0.0.0.0:{port}");
+    try
+    {
+        app.Run($"http://0.0.0.0:{port}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"💥 ERRO CRÍTICO AO INICIAR SERVIDOR: {ex.Message}");
+        Console.WriteLine($"Stack: {ex.StackTrace}");
+        throw;
+    }
 }
