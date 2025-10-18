@@ -5,16 +5,10 @@
     "dockerfilePath": "Investimentos/Dockerfile"
   },
   "deploy": {
-    "startCommand": "dotnet Investimentos.dll --environment=Production",
-    "healthcheckPath": "/ping",
-    "healthcheckTimeout": 60,
+    "startCommand": "dotnet Investimentos.dll",
+    "healthcheckPath": "/swagger",
+    "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 3
-  },
-  "environments": {
-    "production": {
-      "ASPNETCORE_ENVIRONMENT": "Production",
-      "DOTNET_RUNNING_IN_CONTAINER": "true"
-    }
+    "restartPolicyMaxRetries": 10
   }
 }

@@ -21,11 +21,11 @@ namespace ProjetoInvestimentos.Controllers
 
         [HttpGet("test-connection")]
         [SwaggerOperation(
-            Summary = "🔧 Testa conexão com banco Supabase",
-            Description = "Verifica se a conexão com o PostgreSQL Supabase está funcionando e testa tabelas"
+            Summary = "Testa conexão com banco",
+            Description = "Verifica se a conexão com o PostgreSQL está funcionando"
         )]
         [SwaggerResponse(200, "Conexão OK", typeof(object))]
-        [SwaggerResponse(500, "Erro de conexão", typeof(object))]
+        [SwaggerResponse(400, "Erro de conexão", typeof(object))]
         public async Task<IActionResult> TestConnection()
         {
             try
@@ -34,82 +34,29 @@ namespace ProjetoInvestimentos.Controllers
                 
                 // Log da connection string (sem senha para segurança)
                 var safeConnectionString = connectionString?.Replace("ju153074", "***");
-                Console.WriteLine($"🔍 Testing connection: {safeConnectionString}");
+                Console.WriteLine($"Testing connection: {safeConnectionString}");
 
                 using var connection = new NpgsqlConnection(connectionString);
                 await connection.OpenAsync();
-                Console.WriteLine("✅ Connection opened successfully");
                 
-                // Teste de versão do PostgreSQL
-                using var versionCommand = new NpgsqlCommand("SELECT version();", connection);
-                var version = await versionCommand.ExecuteScalarAsync();
-                
-                // Teste se as tabelas existem
-                var tablesQuery = @"
-                    SELECT table_name 
-                    FROM information_schema.tables 
-                    WHERE table_schema = 'public' 
-                    AND table_name IN ('user_profiles', 'investimentos');";
-                    
-                using var tablesCommand = new NpgsqlCommand(tablesQuery, connection);
-                using var reader = await tablesCommand.ExecuteReaderAsync();
-                
-                var existingTables = new List<string>();
-                while (await reader.ReadAsync())
-                {
-                    existingTables.Add(reader.GetString(0));
-                }
-                reader.Close();
-                
-                // Contar registros se as tabelas existirem
-                int userCount = 0, investmentCount = 0;
-                
-                if (existingTables.Contains("user_profiles"))
-                {
-                    using var userCountCommand = new NpgsqlCommand("SELECT COUNT(*) FROM public.user_profiles;", connection);
-                    userCount = Convert.ToInt32(await userCountCommand.ExecuteScalarAsync());
-                }
-                
-                if (existingTables.Contains("investimentos"))
-                {
-                    using var investmentCountCommand = new NpgsqlCommand("SELECT COUNT(*) FROM public.investimentos;", connection);
-                    investmentCount = Convert.ToInt32(await investmentCountCommand.ExecuteScalarAsync());
-                }
+                // Teste simples de query
+                using var command = new NpgsqlCommand("SELECT version();", connection);
+                var result = await command.ExecuteScalarAsync();
                 
                 return Ok(new { 
-                    status = "✅ Success", 
+                    status = "Success", 
                     message = "Conexão estabelecida com sucesso!",
-                    database = new
-                    {
-                        version = version?.ToString(),
-                        host = "aws-1-us-east-1.pooler.supabase.com",
-                        provider = "Supabase PostgreSQL"
-                    },
-                    tables = new
-                    {
-                        existing = existingTables,
-                        user_profiles_count = userCount,
-                        investimentos_count = investmentCount
-                    },
-                    timestamp = DateTime.UtcNow,
+                    postgresVersion = result?.ToString(),
                     connectionString = safeConnectionString
                 });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Connection error: {ex.Message}");
-                return StatusCode(500, new { 
-                    status = "❌ Error", 
+                return BadRequest(new { 
+                    status = "Error", 
                     message = ex.Message,
                     type = ex.GetType().Name,
-                    timestamp = DateTime.UtcNow,
-                    suggestions = new[]
-                    {
-                        "Verifique se o Supabase está online",
-                        "Confirme as credenciais na connection string",
-                        "Verifique se as tabelas foram criadas",
-                        "Teste a conectividade de rede"
-                    }
+                    stackTrace = ex.StackTrace
                 });
             }
         }

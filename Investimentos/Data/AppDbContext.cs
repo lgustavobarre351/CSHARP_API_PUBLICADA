@@ -18,36 +18,27 @@ public class AppDbContext : DbContext
         {
             entity.ToTable("investimentos", "public");
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.UserCpf).HasColumnName("user_cpf").HasMaxLength(11).IsRequired();
-            entity.Property(e => e.Tipo).HasColumnName("tipo").HasMaxLength(50).IsRequired();
-            entity.Property(e => e.Codigo).HasColumnName("codigo").HasMaxLength(20).IsRequired();
-            entity.Property(e => e.Valor).HasColumnName("valor").HasColumnType("numeric(12,2)").IsRequired();
-            entity.Property(e => e.Operacao).HasColumnName("operacao").HasMaxLength(20).IsRequired();
-            entity.Property(e => e.CriadoEm).HasColumnName("criado_em").HasDefaultValueSql("CURRENT_TIMESTAMP");
-            entity.Property(e => e.AlteradoEm).HasColumnName("alterado_em").HasDefaultValueSql("CURRENT_TIMESTAMP");
-            
-            // Relacionamento com UserProfile
-            entity.HasOne<UserProfile>()
-                  .WithMany()
-                  .HasForeignKey(e => e.UserId)
-                  .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(e => e.UserCpf).HasColumnName("user_cpf"); // Mapear para coluna user_cpf
+            entity.Property(e => e.Tipo).HasColumnName("tipo");
+            entity.Property(e => e.Codigo).HasColumnName("codigo");
+            entity.Property(e => e.Valor).HasColumnName("valor").HasColumnType("numeric(12,2)");
+            entity.Property(e => e.Operacao).HasColumnName("operacao");
+            entity.Property(e => e.CriadoEm).HasColumnName("criado_em");
+            entity.Property(e => e.AlteradoEm).HasColumnName("alterado_em");
         });
 
         modelBuilder.Entity<UserProfile>(entity =>
         {
             entity.ToTable("user_profiles", "public");
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
-            entity.Property(e => e.Email).HasColumnName("email").HasMaxLength(255);
-            entity.Property(e => e.Cpf).HasColumnName("cpf").HasMaxLength(11).IsRequired();
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Email).HasColumnName("email");
+            entity.Property(e => e.Cpf).HasColumnName("cpf");
             entity.Property(e => e.Dados).HasColumnName("dados").HasColumnType("jsonb");
-            entity.Property(e => e.CriadoEm).HasColumnName("criado_em").HasDefaultValueSql("CURRENT_TIMESTAMP");
-            entity.Property(e => e.AlteradoEm).HasColumnName("alterado_em").HasDefaultValueSql("CURRENT_TIMESTAMP");
-            
-            // Índices
-            entity.HasIndex(e => e.Cpf).IsUnique();
+            entity.Property(e => e.CriadoEm).HasColumnName("criado_em");
+            entity.Property(e => e.AlteradoEm).HasColumnName("alterado_em");
             
             // Nome não é mapeado para coluna - é usado apenas para lógica de negócio
             entity.Ignore(e => e.Nome);
