@@ -1,0 +1,14 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Investimentos/Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "dotnet Investimentos.dll",
+    "healthcheckPath": "/swagger",
+    "healthcheckTimeout": 300,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}

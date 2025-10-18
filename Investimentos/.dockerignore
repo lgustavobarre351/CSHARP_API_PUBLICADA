@@ -1,0 +1,8 @@
+# .dockerignore para Render - mínimo necessário
+bin/
+obj/
+.vs/
+.vscode/
+.git/
+*.log
+node_modules/

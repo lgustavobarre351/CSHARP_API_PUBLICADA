@@ -1,0 +1,39 @@
+version: "1"
+name: "api-investimentos"
+
+services:
+  - name: "api"
+    build:
+      context: "."
+      dockerfile: "Investimentos/Dockerfile"
+    
+    ports:
+      - port: 8080
+        protocol: "http"
+    
+    env:
+      - name: "ASPNETCORE_ENVIRONMENT"
+        value: "Production"
+      - name: "ASPNETCORE_URLS"
+        value: "http://0.0.0.0:8080"
+      - name: "DefaultConnection"
+        from: "secret"
+        name: "DATABASE_URL"
+    
+    health_check:
+      http:
+        path: "/swagger"
+        port: 8080
+      grace_period_seconds: 30
+      interval_seconds: 30
+      restart_limit: 3
+      timeout_seconds: 10
+    
+    # Configurações para não hibernar
+    scaling:
+      min: 1  # Mínimo 1 instância sempre rodando
+      max: 1  # Máximo 1 (tier gratuito)
+    
+    # Recursos do tier gratuito
+    instance:
+      type: "micro"  # 512MB RAM, 1 vCPU
