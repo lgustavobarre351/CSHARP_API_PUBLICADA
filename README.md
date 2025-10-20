@@ -1,4 +1,4 @@
-# 💰 API de Investimentos - Challenge FIAP 2024
+# 💰 API de Investimentos - Challenge FIAP 2025
 
 > **API RESTful para gerenciamento de investimentos com ASP.NET Core 9.0 e PostgreSQL**
 
